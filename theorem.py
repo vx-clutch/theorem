@@ -1,21 +1,41 @@
 import sys
 
-stack=[]
-memory=[]
-var_lookup={}
+func_lookup = {
+    "print": 1,
+    "print_endline": 1,
+    "|>": 1,
+}
 
-class Page:
-    def __init__(self, initilizer):
-        self.value = initilizer
-        self.addr = len(memory)
-    def read(self):
-        return self.value
-    def write(self, value):
-        memory[self.addr] = value
 
-if len(sys.argv) < 2:
-    print("Usage: python theorem.py <file.theorem>")
-    sys.exit(1)
+class Program:
+    def __init__(self):
+        self.stack = []
+        self.var_lookup = {}
+
+    def exec(self, code):
+        words = code.split(" ")
+        args = []
+        for word, i in words:
+            if word in func_lookup:
+                for j in range(0, func_lookup[word]):
+                    args.append(words[i+j])
+            match word:
+                case "print":
+                    print(args[0], end='')
+                case "print_endline":
+                    print(args[0])
+                case "|>":
+                    self.var_lookup[args[0]] = self.stack.pop()
+
+
+
+def parse(path):
+    lines = []
+    fp = open(path, "r")
+    for ln in fp:
+        lines.append(ln)
+    return lines
+
 
 file_path = sys.argv[1]
 if file_path.endswith(".theorem"):
@@ -24,33 +44,10 @@ else:
     print("theorem: error: file is not a theorem file")
     sys.exit(1)
 
-lines=[]
-def parse(path):
-    fp = open(path, "r")
-    for ln in fp:
-        lines.append(ln)
-    return lines
 
-def exec(ln):
-    words = ln.split(" ")
-    print(words)
-    i=0
-    for word in words:
-        i += 1
-        match word:
-            case "read_line":
-                stack.append(input())
-            case "|>":
-                print(i)
-                if words[i+1].startswith("$"):
-                    var_lookup[words[i+1]] = stack.pop()
-                else: 1/0
-            case "printfn":
-                if words[i+1].startswith("$"):
-                    print(var_lookup[words[i+1]])
-                else: 1/0
-    
-parse(file_path)
-print(lines)
-for ln in lines:
-    exec(ln)
+if len(sys.argv) < 2:
+    print("Usage: python theorem.py <file.theorem>")
+    sys.exit(1)
+
+
+runner = Program()

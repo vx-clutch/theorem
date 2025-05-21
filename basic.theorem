@@ -1,2 +1,3 @@
+print "> "
 read_line |> $input
-printfn $input
+print_endline $input
