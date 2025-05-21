@@ -1,3 +1,0 @@
-print "> "
-read_line |> $input
-print_endline $input
